@@ -1,0 +1,30 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/cli-project-genai/demo-flask-app', '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/cli-project-genai/demo-flask-app']
+
+- name: 'gcr.io/cli-project-genai/demo-flask-app'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+      python -m pytest
+  
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+   - 'run'
+   - 'deploy'
+   - 'demo-flask-app'
+   - '--image'
+   - 'gcr.io/cli-project-genai/demo-flask-app'
+   - '--region'
+   - 'us-central1'
+   - '--allow-unauthenticated'
+images:
+- 'gcr.io/cli-project-genai/demo-flask-app'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
